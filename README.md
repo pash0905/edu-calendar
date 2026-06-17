@@ -1,5 +1,9 @@
 # 교육일정 관리 웹앱 v2
 
+##계정
+- GitHub 및 Supabase 접속계정은 pasuhw0905@google.com 
+- Supabase edu_calendar 프로젝트 비번은 'kd#5050one@'
+
 ## 반영사항
 - 대한민국 공휴일 자동 표시
 - GitHub Pages 정적 호스팅 + Supabase DB 연동 구조
