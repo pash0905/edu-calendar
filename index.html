@@ -1,7 +1,389 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>교육일정 관리</title><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-body{margin:0;background:#f5f7fb;font-family:Arial,'Malgun Gothic',sans-serif;color:#111827}.app{max-width:1500px;margin:auto;padding:22px}.bar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;background:white;border:1px solid #d9dce3;border-radius:18px;padding:14px 18px;position:sticky;top:0;z-index:5;box-shadow:0 8px 22px #0001}.left,.right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}h1{min-width:160px;text-align:center;margin:0;font-size:26px}button,input,select,textarea{font:inherit}button{border:1px solid #d9dce3;background:white;border-radius:10px;padding:9px 12px;cursor:pointer}.primary{background:#1d4ed8;color:white}.nav{font-size:20px;font-weight:bold;width:42px}.status{font-size:12px;color:#6b7280;border:1px solid #d9dce3;border-radius:999px;padding:4px 8px}.hint{color:#6b7280;font-size:13px;margin-top:10px}.cal{margin-top:16px;background:white;border:1px solid #d9dce3;border-radius:18px;overflow:hidden}.week,.grid{display:grid;grid-template-columns:repeat(7,1fr)}.w{font-weight:bold;text-align:center;background:#f8fafc;border-right:1px solid #d9dce3;border-bottom:1px solid #d9dce3;padding:12px}.w:first-child{color:#dc2626}.w:last-child{color:#0284c7;border-right:0}.day{min-height:145px;border-right:1px solid #d9dce3;border-bottom:1px solid #d9dce3;padding:8px;background:white}.day:nth-child(7n){border-right:0}.other{background:#f9fafb;color:#9ca3af}.datebar{display:flex;justify-content:space-between;font-size:13px;font-weight:bold;margin-bottom:6px}.holidayDate .datebar span{color:#dc2626}.today .datebar span{background:#111827;color:white!important;border-radius:999px;padding:3px 8px}.event{margin:4px 0;padding:6px 7px;border-radius:7px;border:1px solid #d1d5db;line-height:1.25;cursor:pointer;word-break:keep-all;min-height:38px;box-sizing:border-box}.event.spacer{visibility:hidden;pointer-events:none}.system{cursor:default;border-style:dashed}.t{font-size:12.5px;font-weight:bold}.m{font-size:11px;opacity:.85;margin-top:2px}.badge{font-size:10px;border:1px solid #0001;border-radius:999px;padding:1px 5px;margin-right:4px;background:#fff9}.modal{display:none;position:fixed;inset:0;background:#0f172a73;align-items:center;justify-content:center;z-index:20;padding:20px}.modal.open{display:flex}.panel{width:min(780px,100%);background:white;border-radius:18px;padding:22px;box-shadow:0 25px 70px #0004;max-height:92vh;overflow:auto}label{display:block;font-weight:bold;font-size:13px;margin:10px 0 5px}.field{width:100%;border:1px solid #d9dce3;border-radius:10px;padding:10px;box-sizing:border-box;background:white}.dateRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mainRow{display:grid;grid-template-columns:1.05fr 1.55fr 1fr;gap:10px;align-items:end}.subRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end}.colorRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.actions{display:flex;justify-content:space-between;margin-top:16px}.danger{color:#b91c1c}.modeHint{font-size:12px;color:#6b7280;margin-top:8px}@media(max-width:900px){.week,.grid{min-width:980px}.cal{overflow:auto}.dateRow,.mainRow,.subRow,.colorRow{grid-template-columns:1fr}.day{min-height:125px}}
-</style></head><body><div class="app"><div class="bar"><div class="left"><button class="nav" id="prev">&lt;</button><h1 id="ym"></h1><button class="nav" id="next">&gt;</button><input type="month" id="picker"><button id="today">오늘</button><span class="status" id="status">저장소 확인 중</span></div><div class="right"><input id="q" type="search" placeholder="교육명/주관부서/장소/담당자/목적 검색"><select id="cat"><option value="">전체</option><option value="training">교육</option><option value="business_trip">출장</option><option value="annual_leave">연차</option><option value="company_issue">회사 이슈</option><option value="holiday">공휴일</option><option value="etc">기타</option></select><button id="xls">엑셀 다운로드</button><button id="csv">CSV</button><button class="primary" id="add">일정 추가</button></div></div><div class="hint">일정 표시는 교육명 아래에 주관부서 · 장소 / 담당자 · 목적 두 줄로 표시됩니다.</div><div class="cal"><div class="week"><div class="w">SUN</div><div class="w">MON</div><div class="w">TUE</div><div class="w">WED</div><div class="w">THU</div><div class="w">FRI</div><div class="w">SAT</div></div><div class="grid" id="grid"></div></div></div>
-<div class="modal" id="modal"><div class="panel"><h2 id="mt">일정 추가</h2><input type="hidden" id="id"><input type="hidden" id="group_id"><input type="hidden" id="edit_mode"><div class="dateRow"><div><label>시작일</label><input class="field" type="date" id="start_d"></div><div><label>종료일</label><input class="field" type="date" id="end_d"></div></div><div class="mainRow"><div><label>구분</label><select class="field" id="category"><option value="training">교육</option><option value="business_trip">출장</option><option value="annual_leave">연차</option><option value="company_issue">회사 이슈</option><option value="etc">기타</option></select></div><div><label>교육명/이슈</label><input class="field" id="title"></div><div><label>장소</label><input class="field" id="place"></div></div><div class="subRow"><div><label>주관부서</label><input class="field" id="org_department" placeholder="예: HVAC역량육성팀"></div><div><label>담당자</label><input class="field" id="owner"></div><div><label>목적</label><select class="field" id="purpose"><option value="강사">강사</option><option value="운영">운영</option><option value="참관">참관</option></select></div></div><div class="colorRow"><div><label>배경색</label><input class="field" type="color" id="bg"></div><div><label>글자색</label><input class="field" type="color" id="fc"></div><div><label>테두리색</label><input class="field" type="color" id="bd"></div></div><label>메모</label><textarea class="field" id="memo" rows="3"></textarea><div class="modeHint" id="modeHint"></div><div class="actions"><button class="danger" id="del">삭제</button><div><button id="cancel">취소</button><button class="primary" id="save">저장</button></div></div></div></div>
-<script>
-let events=[],holidays={},cur=new Date(),db=null,useDb=false;cur.setDate(1);const $=x=>document.getElementById(x),pad=n=>String(n).padStart(2,'0'),key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));function lab(c){return c==='training'?'교육':c==='business_trip'?'출장':c==='annual_leave'?'연차':c==='company_issue'?'회사':c==='holiday'?'공휴일':'기타'}function norm(r){let base=r.date||r.start_date||key(new Date());return{id:r.id||crypto.randomUUID(),group_id:r.group_id||r.id||crypto.randomUUID(),date:base,start_date:r.start_date||base,end_date:r.end_date||r.start_date||base,title:r.title||'',owner:r.owner||'',place:r.place||'',category:r.category||'training',org_department:r.org_department||'',purpose:r.purpose||'운영',bg_color:r.bg_color||'#fff',font_color:r.font_color||'#111827',border_color:r.border_color||'#d1d5db',memo:r.memo||''}}function parts(a){return a.filter(x=>String(x||'').trim()).map(esc).join(' · ')}function dateList(s,e){let a=new Date(s+'T00:00:00'),b=new Date(e+'T00:00:00'),out=[];for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1))out.push(key(d));return out}function gkey(e){return e.group_id||e.id}function overlap(e,ws,we){return new Date(e.start_date+'T00:00:00')<=we&&new Date(e.end_date+'T00:00:00')>=ws}async function init(){let init=[];try{init=await fetch('initial_events.json').then(r=>r.json())}catch(e){}let c=window.APP_CONFIG||{};useDb=!!(c.USE_SUPABASE&&c.SUPABASE_URL&&c.SUPABASE_ANON_KEY&&window.supabase);if(useDb){db=window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY);$('status').textContent='Supabase 연결';await loadDb();db.channel('schedules').on('postgres_changes',{event:'*',schema:'public',table:'schedules'},async()=>{await loadDb();render()}).subscribe()}else{$('status').textContent='내 브라우저 저장';events=JSON.parse(localStorage.getItem('trainingEvents')||JSON.stringify(init)).map(norm)}render()}async function loadDb(){let{data,error}=await db.from('schedules').select('*').order('date');if(error){alert(error.message);return}events=(data||[]).map(norm)}function saveLocal(){localStorage.setItem('trainingEvents',JSON.stringify(events))}async function loadHol(y){if(holidays[y])return;holidays[y]={};try{let r=await fetch(`https://date.nager.at/api/v3/PublicHolidays/${y}/KR`);if(r.ok)(await r.json()).forEach(h=>{holidays[y][h.date]=holidays[y][h.date]||[];holidays[y][h.date].push(h.localName||h.name)})}catch(e){}if(!Object.keys(holidays[y]).length)[['01-01','1월 1일'],['03-01','3·1절'],['05-05','어린이날'],['06-06','현충일'],['08-15','광복절'],['10-03','개천절'],['10-09','한글날'],['12-25','기독탄신일']].forEach(x=>holidays[y][`${y}-${x[0]}`]=[x[1]])}function hol(dk){let y=+dk.slice(0,4);return(holidays[y]?.[dk]||[]).map(n=>({id:'h'+dk+n,date:dk,start_date:dk,end_date:dk,title:n,category:'holiday',bg_color:'#fff5f5',font_color:'#dc2626',border_color:'#fca5a5',system:true}))}function slots(ws,we){let groups={},items=[];events.forEach(e=>{let g=gkey(e);(groups[g]||(groups[g]=[])).push(e)});Object.keys(groups).forEach(g=>{let arr=groups[g].map(norm),s=arr.reduce((a,e)=>a<e.start_date?a:e.start_date,arr[0].start_date),en=arr.reduce((a,e)=>a>e.end_date?a:e.end_date,arr[0].end_date),first=arr.slice().sort((a,b)=>a.date.localeCompare(b.date))[0],tmp={...first,start_date:s,end_date:en,group_id:g};if(overlap(tmp,ws,we))items.push(tmp)});items.sort((a,b)=>a.start_date.localeCompare(b.start_date)||a.end_date.localeCompare(b.end_date)||a.title.localeCompare(b.title));let rows=[];items.forEach(it=>{let ok=false;for(let i=0;i<rows.length;i++){if(!rows[i].some(x=>!(new Date(it.end_date+'T00:00:00')<new Date(x.start_date+'T00:00:00')||new Date(it.start_date+'T00:00:00')>new Date(x.end_date+'T00:00:00')))){rows[i].push(it);it.slot=i;ok=true;break}}if(!ok){it.slot=rows.length;rows.push([it])}});let map={};items.forEach(it=>map[gkey(it)]=it.slot);return{map,count:rows.length}}async function render(){await loadHol(cur.getFullYear());let y=cur.getFullYear(),m=cur.getMonth();$('ym').textContent=`${y}-${pad(m+1)}`;$('picker').value=`${y}-${pad(m+1)}`;let first=new Date(y,m,1),start=new Date(first);start.setDate(start.getDate()-start.getDay());let last=new Date(y,m+1,0),end=new Date(last);end.setDate(end.getDate()+6-end.getDay());let q=$('q').value.toLowerCase(),cat=$('cat').value,today=key(new Date()),html='';for(let ws=new Date(start);ws<=end;ws.setDate(ws.getDate()+7)){let we=new Date(ws);we.setDate(we.getDate()+6);let sl=slots(ws,we);for(let i=0;i<7;i++){let d=new Date(ws);d.setDate(ws.getDate()+i);let dk=key(d),arr=events.filter(e=>e.date===dk);if(cat)arr=arr.filter(e=>e.category===cat);if(q)arr=arr.filter(e=>[e.title,e.org_department,e.place,e.owner,e.purpose,e.memo].join(' ').toLowerCase().includes(q));let hs=hol(dk);html+=`<div class="day ${d.getMonth()!=m?'other':''} ${dk===today?'today':''} ${hs.length?'holidayDate':''}"><div class="datebar"><span>${d.getDate()}</span><button onclick="openNew('${dk}')">＋</button></div>`;hs.forEach(e=>html+=eventHtml(e));let by={};arr.forEach(e=>by[sl.map[gkey(e)]??999]=e);for(let s=0;s<sl.count;s++)html+=by[s]?eventHtml(by[s]):'<div class="event spacer"><div class="t">.</div><div class="m">.</div></div>';Object.keys(by).filter(s=>+s>=999).forEach(s=>html+=eventHtml(by[s]));html+='</div>'}}$('grid').innerHTML=html}function eventHtml(e){let l2=parts([e.org_department,e.place]),l3=parts([e.owner,e.purpose]);return `<div class="event ${e.system?'system':''}" ${e.system?'':'onclick="openEdit(\''+e.id+'\')"'} style="background:${e.bg_color};color:${e.font_color};border-color:${e.border_color}"><div class="t"><span class="badge">${lab(e.category)}</span>${esc(e.title)}</div>${l2?`<div class="m">${l2}</div>`:''}${l3?`<div class="m">${l3}</div>`:''}</div>`}function openNew(dk){$('mt').textContent='일정 추가';$('edit_mode').value='new';$('id').value='';$('group_id').value='';$('start_d').value=dk;$('end_d').value=dk;$('start_d').disabled=false;$('end_d').disabled=false;$('title').value='';$('owner').value='';$('place').value='';$('category').value='training';$('org_department').value='';$('purpose').value='운영';$('bg').value='#CAEDFB';$('fc').value='#111827';$('bd').value='#D1D5DB';$('memo').value='';$('modeHint').textContent='';$('del').style.visibility='hidden';$('modal').classList.add('open')}function openEdit(id){let e=events.find(x=>x.id===id);if(!e)return;$('mt').textContent='일정 편집';$('edit_mode').value='single';$('id').value=e.id;$('group_id').value=gkey(e);$('start_d').value=e.date;$('end_d').value=e.date;$('start_d').disabled=true;$('end_d').disabled=true;$('title').value=e.title;$('owner').value=e.owner;$('place').value=e.place;$('category').value=e.category;$('org_department').value=e.org_department||'';$('purpose').value=e.purpose||'운영';$('bg').value=e.bg_color;$('fc').value=e.font_color;$('bd').value=e.border_color;$('memo').value=e.memo;$('modeHint').textContent='클릭한 날짜 1건만 수정됩니다.';$('del').style.visibility='visible';$('modal').classList.add('open')}async function save(){let id=$('id').value,mode=$('edit_mode').value,start=$('start_d').value,end=$('end_d').value;if(!start||!end){alert('시작일과 종료일 필수');return}if(new Date(start+'T00:00:00')>new Date(end+'T00:00:00')){alert('종료일은 시작일보다 빠를 수 없습니다.');return}let title=$('title').value.trim();if(!title){alert('교육명/이슈 필수');return}let base={title,owner:$('owner').value.trim(),place:$('place').value.trim(),category:$('category').value,org_department:$('org_department').value.trim(),purpose:$('purpose').value,bg_color:$('bg').value,font_color:$('fc').value,border_color:$('bd').value,memo:$('memo').value.trim()};if(useDb){if(mode==='single'&&id){let r=await db.from('schedules').update({...base,date:start,start_date:start,end_date:end}).eq('id',id);if(r.error){alert(r.error.message);return}}else{let gid=crypto.randomUUID(),payloads=dateList(start,end).map(d=>({...base,group_id:gid,date:d,start_date:start,end_date:end}));let r=await db.from('schedules').insert(payloads);if(r.error){alert(r.error.message);return}}await loadDb()}else{if(mode==='single'&&id){let i=events.findIndex(x=>x.id===id);if(i>=0)events[i]=norm({...events[i],...base,date:start,start_date:start,end_date:end})}else{let gid=crypto.randomUUID();events.push(...dateList(start,end).map(d=>norm({...base,group_id:gid,date:d,start_date:start,end_date:end})))}saveLocal()}close();cur=new Date(start+'T00:00:00');cur.setDate(1);render()}async function del(){let id=$('id').value;if(!id)return close();if(useDb){let r=await db.from('schedules').delete().eq('id',id);if(r.error){alert(r.error.message);return}await loadDb()}else{events=events.filter(x=>x.id!==id);saveLocal()}close();render()}function close(){$('modal').classList.remove('open');$('start_d').disabled=false;$('end_d').disabled=false}function rows(){let y=cur.getFullYear(),m=cur.getMonth(),out=[];for(let d=new Date(y,m,1);d<=new Date(y,m+1,0);d.setDate(d.getDate()+1)){let dk=key(d);out.push(...hol(dk),...events.filter(e=>e.date===dk))}return out}function dl(name,content,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click()}function csv(){let a=[['날짜','시작일','종료일','구분','제목','주관부서','장소','담당자','목적','메모'],...rows().map(r=>[r.date,r.start_date||r.date,r.end_date||r.date,lab(r.category),r.title,r.org_department||'',r.place||'',r.owner||'',r.purpose||'',r.memo||''])];dl(`교육일정_${$('ym').textContent}.csv`,'\ufeff'+a.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}function xls(){let t='<html><meta charset="utf-8"><table border=1><tr><th>날짜</th><th>시작일</th><th>종료일</th><th>구분</th><th>제목</th><th>주관부서</th><th>장소</th><th>담당자</th><th>목적</th><th>메모</th></tr>';rows().forEach(r=>t+=`<tr><td>${r.date}</td><td>${r.start_date||r.date}</td><td>${r.end_date||r.date}</td><td>${lab(r.category)}</td><td style="background:${r.bg_color};color:${r.font_color}">${esc(r.title)}</td><td>${esc(r.org_department||'')}</td><td>${esc(r.place||'')}</td><td>${esc(r.owner||'')}</td><td>${esc(r.purpose||'')}</td><td>${esc(r.memo||'')}</td></tr>`);dl(`교육일정_${$('ym').textContent}.xls`,t+'</table>','application/vnd.ms-excel')}$('prev').onclick=()=>{cur.setMonth(cur.getMonth()-1);cur.setDate(1);render()};$('next').onclick=()=>{cur.setMonth(cur.getMonth()+1);cur.setDate(1);render()};$('picker').onchange=e=>{let[y,m]=e.target.value.split('-').map(Number);cur=new Date(y,m-1,1);render()};$('today').onclick=()=>{cur=new Date();cur.setDate(1);render()};$('q').oninput=render;$('cat').onchange=render;$('add').onclick=()=>openNew(key(new Date(cur.getFullYear(),cur.getMonth(),1)));$('save').onclick=save;$('del').onclick=del;$('cancel').onclick=close;$('csv').onclick=csv;$('xls').onclick=xls;$('modal').onclick=e=>{if(e.target.id==='modal')close()};init();
-</script></body></html>
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>교육일정 관리</title>
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            font-family: Arial, 'Malgun Gothic', sans-serif;
+            color: #111827
+        }
+
+        .app {
+            max-width: 1500px;
+            margin: auto;
+            padding: 22px
+        }
+
+        .bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: white;
+            border: 1px solid #d9dce3;
+            border-radius: 18px;
+            padding: 14px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            box-shadow: 0 8px 22px #0001
+        }
+
+        .left,
+        .right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        h1 {
+            min-width: 160px;
+            text-align: center;
+            margin: 0;
+            font-size: 26px
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit
+        }
+
+        button {
+            border: 1px solid #d9dce3;
+            background: white;
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer
+        }
+
+        .primary {
+            background: #1d4ed8;
+            color: white
+        }
+
+        .nav {
+            font-size: 20px;
+            font-weight: bold;
+            width: 42px
+        }
+
+        .status {
+            font-size: 12px;
+            color: #6b7280;
+            border: 1px solid #d9dce3;
+            border-radius: 999px;
+            padding: 4px 8px
+        }
+
+        .hint {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 10px
+        }
+
+        .cal {
+            margin-top: 16px;
+            background: white;
+            border: 1px solid #d9dce3;
+            border-radius: 18px;
+            overflow: hidden
+        }
+
+        .week,
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr)
+        }
+
+        .w {
+            font-weight: bold;
+            text-align: center;
+            background: #f8fafc;
+            border-right: 1px solid #d9dce3;
+            border-bottom: 1px solid #d9dce3;
+            padding: 12px
+        }
+
+        .w:first-child {
+            color: #dc2626
+        }
+
+        .w:last-child {
+            color: #0284c7;
+            border-right: 0
+        }
+
+        .day {
+            min-height: 145px;
+            border-right: 1px solid #d9dce3;
+            border-bottom: 1px solid #d9dce3;
+            padding: 8px;
+            background: white
+        }
+
+        .day:nth-child(7n) {
+            border-right: 0
+        }
+
+        .other {
+            background: #f9fafb;
+            color: #9ca3af
+        }
+
+        .datebar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px
+        }
+
+        .holidayDate .datebar span {
+            color: #dc2626
+        }
+
+        .today .datebar span {
+            background: #111827;
+            color: white !important;
+            border-radius: 999px;
+            padding: 3px 8px
+        }
+
+        .event {
+            margin: 4px 0;
+            padding: 6px 7px;
+            border-radius: 7px;
+            border: 1px solid #d1d5db;
+            line-height: 1.25;
+            cursor: pointer;
+            word-break: keep-all;
+            min-height: 38px;
+            box-sizing: border-box
+        }
+
+        .event.spacer {
+            visibility: hidden;
+            pointer-events: none
+        }
+
+        .system {
+            cursor: default;
+            border-style: dashed
+        }
+
+        .t {
+            font-size: 12.5px;
+            font-weight: bold
+        }
+
+        .m {
+            font-size: 11px;
+            opacity: .85;
+            margin-top: 2px
+        }
+
+        .badge {
+            font-size: 10px;
+            border: 1px solid #0001;
+            border-radius: 999px;
+            padding: 1px 5px;
+            margin-right: 4px;
+            background: #fff9
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a73;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            padding: 20px
+        }
+
+        .modal.open {
+            display: flex
+        }
+
+        .panel {
+            width: min(780px, 100%);
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 25px 70px #0004;
+            max-height: 92vh;
+            overflow: auto
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 13px;
+            margin: 10px 0 5px
+        }
+
+        .field {
+            width: 100%;
+            border: 1px solid #d9dce3;
+            border-radius: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            background: white
+        }
+
+        .dateRow {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .mainRow {
+            display: grid;
+            grid-template-columns: 1.05fr 1.55fr 1fr;
+            gap: 10px;
+            align-items: end
+        }
+
+        .subRow {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: end
+        }
+
+        .colorRow {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px
+        }
+
+        .danger {
+            color: #b91c1c
+        }
+
+        .modeHint {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px
+        }
+
+        @media(max-width:900px) {
+
+            .week,
+            .grid {
+                min-width: 980px
+            }
+
+            .cal {
+                overflow: auto
+            }
+
+            .dateRow,
+            .mainRow,
+            .subRow,
+            .colorRow {
+                grid-template-columns: 1fr
+            }
+
+            .day {
+                min-height: 125px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="bar">
+            <div class="left"><button class="nav" id="prev">&lt;</button>
+                <h1 id="ym"></h1><button class="nav" id="next">&gt;</button><input type="month" id="picker"><button
+                    id="today">오늘</button><span class="status" id="status">저장소 확인 중</span>
+            </div>
+            <div class="right"><input id="q" type="search" placeholder="교육명/주관부서/장소/담당자/목적 검색"><select id="cat">
+                    <option value="">전체</option>
+                    <option value="training">교육</option>
+                    <option value="business_trip">출장</option>
+                    <option value="annual_leave">연차</option>
+                    <option value="company_issue">회사 이슈</option>
+                    <option value="holiday">공휴일</option>
+                    <option value="etc">기타</option>
+                </select><button id="xls">엑셀 다운로드</button><button id="csv">CSV</button><button class="primary"
+                    id="add">일정 추가</button></div>
+        </div>
+        <div class="hint">일정 표시는 교육명 아래에 주관부서 · 장소 / 담당자 · 목적 두 줄로 표시됩니다.</div>
+        <div class="cal">
+            <div class="week">
+                <div class="w">SUN</div>
+                <div class="w">MON</div>
+                <div class="w">TUE</div>
+                <div class="w">WED</div>
+                <div class="w">THU</div>
+                <div class="w">FRI</div>
+                <div class="w">SAT</div>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+    </div>
+    <div class="modal" id="modal">
+        <div class="panel">
+            <h2 id="mt">일정 추가</h2><input type="hidden" id="id"><input type="hidden" id="group_id"><input type="hidden"
+                id="edit_mode">
+            <div class="dateRow">
+                <div><label>시작일</label><input class="field" type="date" id="start_d"></div>
+                <div><label>종료일</label><input class="field" type="date" id="end_d"></div>
+            </div>
+            <div class="mainRow">
+                <div><label>구분</label><select class="field" id="category">
+                        <option value="training">교육</option>
+                        <option value="business_trip">출장</option>
+                        <option value="annual_leave">연차</option>
+                        <option value="company_issue">회사 이슈</option>
+                        <option value="etc">기타</option>
+                    </select></div>
+                <div><label>교육명/이슈</label><input class="field" id="title"></div>
+                <div><label>장소</label><input class="field" id="place"></div>
+            </div>
+            <div class="subRow">
+                <div><label>주관부서</label><input class="field" id="org_department" placeholder="예: HVAC역량육성팀"></div>
+                <div><label>담당자</label><input class="field" id="owner"></div>
+                <div><label>목적</label><select class="field" id="purpose">
+                        <option value=""></option>
+                        <option value="강사">강사</option>
+                        <option value="운영">운영</option>
+                        <option value="참관">참관</option>
+                    </select></div>
+            </div>
+            <div class="colorRow">
+                <div><label>배경색</label><input class="field" type="color" id="bg"></div>
+                <div><label>글자색</label><input class="field" type="color" id="fc"></div>
+                <div><label>테두리색</label><input class="field" type="color" id="bd"></div>
+            </div><label>메모</label><textarea class="field" id="memo" rows="3"></textarea>
+            <div class="modeHint" id="modeHint"></div>
+            <div class="actions"><button class="danger" id="del">삭제</button>
+                <div><button id="cancel">취소</button><button class="primary" id="save">저장</button></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let events = [], holidays = {}, cur = new Date(), db = null, useDb = false; cur.setDate(1); const $ = x => document.getElementById(x), pad = n => String(n).padStart(2, '0'), key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, esc = s => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); function lab(c) { return c === 'training' ? '교육' : c === 'business_trip' ? '출장' : c === 'annual_leave' ? '연차' : c === 'company_issue' ? '회사' : c === 'holiday' ? '공휴일' : '기타' } function norm(r) { let base = r.date || r.start_date || key(new Date()); return { id: r.id || crypto.randomUUID(), group_id: r.group_id || r.id || crypto.randomUUID(), date: base, start_date: r.start_date || base, end_date: r.end_date || r.start_date || base, title: r.title || '', owner: r.owner || '', place: r.place || '', category: r.category || 'training', org_department: r.org_department || '', purpose: r.purpose || '', bg_color: r.bg_color || '#fff', font_color: r.font_color || '#111827', border_color: r.border_color || '#d1d5db', memo: r.memo || '' } } function parts(a) { return a.filter(x => String(x || '').trim()).map(esc).join(' · ') } function dateList(s, e) { let a = new Date(s + 'T00:00:00'), b = new Date(e + 'T00:00:00'), out = []; for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1))out.push(key(d)); return out } function gkey(e) { return e.group_id || e.id } function overlap(e, ws, we) { return new Date(e.start_date + 'T00:00:00') <= we && new Date(e.end_date + 'T00:00:00') >= ws } async function init() { let init = []; try { init = await fetch('initial_events.json').then(r => r.json()) } catch (e) { } let c = window.APP_CONFIG || {}; useDb = !!(c.USE_SUPABASE && c.SUPABASE_URL && c.SUPABASE_ANON_KEY && window.supabase); if (useDb) { db = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); $('status').textContent = 'Supabase 연결'; await loadDb(); db.channel('schedules').on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, async () => { await loadDb(); render() }).subscribe() } else { $('status').textContent = '내 브라우저 저장'; events = JSON.parse(localStorage.getItem('trainingEvents') || JSON.stringify(init)).map(norm) } render() } async function loadDb() { let { data, error } = await db.from('schedules').select('*').order('date'); if (error) { alert(error.message); return } events = (data || []).map(norm) } function saveLocal() { localStorage.setItem('trainingEvents', JSON.stringify(events)) } async function loadHol(y) { if (holidays[y]) return; holidays[y] = {}; try { let r = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${y}/KR`); if (r.ok) (await r.json()).forEach(h => { holidays[y][h.date] = holidays[y][h.date] || []; holidays[y][h.date].push(h.localName || h.name) }) } catch (e) { } if (!Object.keys(holidays[y]).length) [['01-01', '1월 1일'], ['03-01', '3·1절'], ['05-05', '어린이날'], ['06-06', '현충일'], ['08-15', '광복절'], ['10-03', '개천절'], ['10-09', '한글날'], ['12-25', '기독탄신일']].forEach(x => holidays[y][`${y}-${x[0]}`] = [x[1]]) } function hol(dk) { let y = +dk.slice(0, 4); return (holidays[y]?.[dk] || []).map(n => ({ id: 'h' + dk + n, date: dk, start_date: dk, end_date: dk, title: n, category: 'holiday', bg_color: '#fff5f5', font_color: '#dc2626', border_color: '#fca5a5', system: true })) } function slots(ws, we) { let groups = {}, items = []; events.forEach(e => { let g = gkey(e); (groups[g] || (groups[g] = [])).push(e) }); Object.keys(groups).forEach(g => { let arr = groups[g].map(norm), s = arr.reduce((a, e) => a < e.start_date ? a : e.start_date, arr[0].start_date), en = arr.reduce((a, e) => a > e.end_date ? a : e.end_date, arr[0].end_date), first = arr.slice().sort((a, b) => a.date.localeCompare(b.date))[0], tmp = { ...first, start_date: s, end_date: en, group_id: g }; if (overlap(tmp, ws, we)) items.push(tmp) }); items.sort((a, b) => a.start_date.localeCompare(b.start_date) || a.end_date.localeCompare(b.end_date) || a.title.localeCompare(b.title)); let rows = []; items.forEach(it => { let ok = false; for (let i = 0; i < rows.length; i++) { if (!rows[i].some(x => !(new Date(it.end_date + 'T00:00:00') < new Date(x.start_date + 'T00:00:00') || new Date(it.start_date + 'T00:00:00') > new Date(x.end_date + 'T00:00:00')))) { rows[i].push(it); it.slot = i; ok = true; break } } if (!ok) { it.slot = rows.length; rows.push([it]) } }); let map = {}; items.forEach(it => map[gkey(it)] = it.slot); return { map, count: rows.length } } async function render() { await loadHol(cur.getFullYear()); let y = cur.getFullYear(), m = cur.getMonth(); $('ym').textContent = `${y}-${pad(m + 1)}`; $('picker').value = `${y}-${pad(m + 1)}`; let first = new Date(y, m, 1), start = new Date(first); start.setDate(start.getDate() - start.getDay()); let last = new Date(y, m + 1, 0), end = new Date(last); end.setDate(end.getDate() + 6 - end.getDay()); let q = $('q').value.toLowerCase(), cat = $('cat').value, today = key(new Date()), html = ''; for (let ws = new Date(start); ws <= end; ws.setDate(ws.getDate() + 7)) { let we = new Date(ws); we.setDate(we.getDate() + 6); let sl = slots(ws, we); for (let i = 0; i < 7; i++) { let d = new Date(ws); d.setDate(ws.getDate() + i); let dk = key(d), arr = events.filter(e => e.date === dk); if (cat) arr = arr.filter(e => e.category === cat); if (q) arr = arr.filter(e => [e.title, e.org_department, e.place, e.owner, e.purpose, e.memo].join(' ').toLowerCase().includes(q)); let hs = hol(dk); html += `<div class="day ${d.getMonth() != m ? 'other' : ''} ${dk === today ? 'today' : ''} ${hs.length ? 'holidayDate' : ''}"><div class="datebar"><span>${d.getDate()}</span><button onclick="openNew('${dk}')">＋</button></div>`; hs.forEach(e => html += eventHtml(e)); let by = {}; arr.forEach(e => by[sl.map[gkey(e)] ?? 999] = e); for (let s = 0; s < sl.count; s++)html += by[s] ? eventHtml(by[s]) : '<div class="event spacer"><div class="t">.</div><div class="m">.</div></div>'; Object.keys(by).filter(s => +s >= 999).forEach(s => html += eventHtml(by[s])); html += '</div>' } } $('grid').innerHTML = html } function eventHtml(e) { let l2 = parts([e.org_department, e.place]), l3 = parts([e.owner, e.purpose]); return `<div class="event ${e.system ? 'system' : ''}" ${e.system ? '' : 'onclick="openEdit(\'' + e.id + '\')"'} style="background:${e.bg_color};color:${e.font_color};border-color:${e.border_color}"><div class="t"><span class="badge">${lab(e.category)}</span>${esc(e.title)}</div>${l2 ? `<div class="m">${l2}</div>` : ''}${l3 ? `<div class="m">${l3}</div>` : ''}</div>` } function openNew(dk) { $('mt').textContent = '일정 추가'; $('edit_mode').value = 'new'; $('id').value = ''; $('group_id').value = ''; $('start_d').value = dk; $('end_d').value = dk; $('start_d').disabled = false; $('end_d').disabled = false; $('title').value = ''; $('owner').value = ''; $('place').value = ''; $('category').value = 'training'; $('org_department').value = ''; $('purpose').value = ''; $('bg').value = '#CAEDFB'; $('fc').value = '#111827'; $('bd').value = '#D1D5DB'; $('memo').value = ''; $('modeHint').textContent = ''; $('del').style.visibility = 'hidden'; $('modal').classList.add('open') } function openEdit(id) { let e = events.find(x => x.id === id); if (!e) return; $('mt').textContent = '일정 편집'; $('edit_mode').value = 'single'; $('id').value = e.id; $('group_id').value = gkey(e); $('start_d').value = e.date; $('end_d').value = e.date; $('start_d').disabled = true; $('end_d').disabled = true; $('title').value = e.title; $('owner').value = e.owner; $('place').value = e.place; $('category').value = e.category; $('org_department').value = e.org_department || ''; $('purpose').value = e.purpose || ''; $('bg').value = e.bg_color; $('fc').value = e.font_color; $('bd').value = e.border_color; $('memo').value = e.memo; $('modeHint').textContent = '클릭한 날짜 1건만 수정됩니다.'; $('del').style.visibility = 'visible'; $('modal').classList.add('open') } async function save() { let id = $('id').value, mode = $('edit_mode').value, start = $('start_d').value, end = $('end_d').value; if (!start || !end) { alert('시작일과 종료일 필수'); return } if (new Date(start + 'T00:00:00') > new Date(end + 'T00:00:00')) { alert('종료일은 시작일보다 빠를 수 없습니다.'); return } let title = $('title').value.trim(); if (!title) { alert('교육명/이슈 필수'); return } let base = { title, owner: $('owner').value.trim(), place: $('place').value.trim(), category: $('category').value, org_department: $('org_department').value.trim(), purpose: $('purpose').value, bg_color: $('bg').value, font_color: $('fc').value, border_color: $('bd').value, memo: $('memo').value.trim() }; if (useDb) { if (mode === 'single' && id) { let r = await db.from('schedules').update({ ...base, date: start, start_date: start, end_date: end }).eq('id', id); if (r.error) { alert(r.error.message); return } } else { let gid = crypto.randomUUID(), payloads = dateList(start, end).map(d => ({ ...base, group_id: gid, date: d, start_date: start, end_date: end })); let r = await db.from('schedules').insert(payloads); if (r.error) { alert(r.error.message); return } } await loadDb() } else { if (mode === 'single' && id) { let i = events.findIndex(x => x.id === id); if (i >= 0) events[i] = norm({ ...events[i], ...base, date: start, start_date: start, end_date: end }) } else { let gid = crypto.randomUUID(); events.push(...dateList(start, end).map(d => norm({ ...base, group_id: gid, date: d, start_date: start, end_date: end }))) } saveLocal() } close(); cur = new Date(start + 'T00:00:00'); cur.setDate(1); render() } async function del() { let id = $('id').value; if (!id) return close(); if (useDb) { let r = await db.from('schedules').delete().eq('id', id); if (r.error) { alert(r.error.message); return } await loadDb() } else { events = events.filter(x => x.id !== id); saveLocal() } close(); render() } function close() { $('modal').classList.remove('open'); $('start_d').disabled = false; $('end_d').disabled = false } function rows() { let y = cur.getFullYear(), m = cur.getMonth(), out = []; for (let d = new Date(y, m, 1); d <= new Date(y, m + 1, 0); d.setDate(d.getDate() + 1)) { let dk = key(d); out.push(...hol(dk), ...events.filter(e => e.date === dk)) } return out } function dl(name, content, type) { let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], { type })); a.download = name; a.click() } function csv() { let a = [['날짜', '시작일', '종료일', '구분', '제목', '주관부서', '장소', '담당자', '목적', '메모'], ...rows().map(r => [r.date, r.start_date || r.date, r.end_date || r.date, lab(r.category), r.title, r.org_department || '', r.place || '', r.owner || '', r.purpose || '', r.memo || ''])]; dl(`교육일정_${$('ym').textContent}.csv`, '\ufeff' + a.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n'), 'text/csv') } function xls() { let t = '<html><meta charset="utf-8"><table border=1><tr><th>날짜</th><th>시작일</th><th>종료일</th><th>구분</th><th>제목</th><th>주관부서</th><th>장소</th><th>담당자</th><th>목적</th><th>메모</th></tr>'; rows().forEach(r => t += `<tr><td>${r.date}</td><td>${r.start_date || r.date}</td><td>${r.end_date || r.date}</td><td>${lab(r.category)}</td><td style="background:${r.bg_color};color:${r.font_color}">${esc(r.title)}</td><td>${esc(r.org_department || '')}</td><td>${esc(r.place || '')}</td><td>${esc(r.owner || '')}</td><td>${esc(r.purpose || '')}</td><td>${esc(r.memo || '')}</td></tr>`); dl(`교육일정_${$('ym').textContent}.xls`, t + '</table>', 'application/vnd.ms-excel') } $('prev').onclick = () => { cur.setMonth(cur.getMonth() - 1); cur.setDate(1); render() }; $('next').onclick = () => { cur.setMonth(cur.getMonth() + 1); cur.setDate(1); render() }; $('picker').onchange = e => { let [y, m] = e.target.value.split('-').map(Number); cur = new Date(y, m - 1, 1); render() }; $('today').onclick = () => { cur = new Date(); cur.setDate(1); render() }; $('q').oninput = render; $('cat').onchange = render; $('add').onclick = () => openNew(key(new Date(cur.getFullYear(), cur.getMonth(), 1))); $('save').onclick = save; $('del').onclick = del; $('cancel').onclick = close; $('csv').onclick = csv; $('xls').onclick = xls; $('modal').onclick = e => { if (e.target.id === 'modal') close() }; init();
+    </script>
+</body>
+
+</html>
