@@ -460,6 +460,85 @@
                 grid-template-columns: 1fr;
                 gap: 6px;
             }
+
+            /* 모바일 팝업: 화면을 꽉 채우지 않고 가운데에 작게 표시 */
+            .modal {
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                overflow: auto;
+            }
+
+            .panel {
+                width: min(94vw, 430px);
+                max-height: 76dvh;
+                padding: 12px;
+                border-radius: 14px;
+                overflow: auto;
+                box-sizing: border-box;
+            }
+
+            .panel h2 {
+                margin: 0 0 8px;
+                font-size: 17px;
+            }
+
+            .panel label {
+                font-size: 11px;
+                margin: 5px 0 3px;
+            }
+
+            .panel .field {
+                padding: 6px 7px;
+                font-size: 12px;
+                min-height: 30px;
+                border-radius: 7px;
+            }
+
+            .panel textarea.field {
+                min-height: 52px;
+            }
+
+            /* 모바일 팝업 내부는 다시 촘촘한 다열 배치로 표시 */
+            .panel .dateRow {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .panel .mainRow {
+                grid-template-columns: 0.85fr 1.55fr 0.9fr;
+                gap: 6px;
+            }
+
+            .panel .subRow {
+                grid-template-columns: 1fr 1fr 0.9fr;
+                gap: 6px;
+            }
+
+            .panel .colorRow {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 6px;
+            }
+
+            .panel .actions {
+                position: sticky;
+                bottom: 0;
+                background: white;
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 1px solid #e5e7eb;
+                z-index: 2;
+            }
+
+            .panel .actions button {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+
+            .panel .modeHint {
+                font-size: 11px;
+                margin-top: 5px;
+            }
         }
     </style>
 </head>
