@@ -286,24 +286,179 @@
 
         @media(max-width:900px) {
 
+            .app {
+                padding: 8px;
+            }
+
+            /* 상단 박스 전체 축소 */
+            .bar {
+                position: static;
+                padding: 10px;
+                gap: 8px;
+                border-radius: 14px;
+                box-shadow: 0 4px 12px #0001;
+            }
+
+            /* 상단 1줄: < 2026-07 > 오늘 */
+            .left {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 38px 1fr 38px 58px;
+                gap: 6px;
+                align-items: center;
+            }
+
+            #prev {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            #ym {
+                grid-column: 2;
+                grid-row: 1;
+                font-size: 22px;
+                min-width: 0;
+                text-align: center;
+            }
+
+            #next {
+                grid-column: 3;
+                grid-row: 1;
+            }
+
+            #today {
+                grid-column: 4;
+                grid-row: 1;
+                width: 100%;
+                padding: 8px 4px;
+                font-size: 13px;
+            }
+
+            .nav {
+                width: 38px;
+                height: 38px;
+                padding: 0;
+                font-size: 18px;
+            }
+
+            /* 모바일에서는 월 선택, Supabase 상태 숨김 */
+            #picker,
+            #status {
+                display: none;
+            }
+
+            /* 상단 2줄: 검색창 + 일정 추가 */
+            .right {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 96px;
+                gap: 6px;
+                align-items: center;
+            }
+
+            #q {
+                grid-column: 1;
+                grid-row: 1;
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            #add {
+                grid-column: 2;
+                grid-row: 1;
+                padding: 9px 4px;
+                font-size: 13px;
+            }
+
+            /* 모바일에서는 필터/다운로드 버튼 숨김 */
+            #cat,
+            #xls,
+            #csv {
+                display: none;
+            }
+
+            .hint {
+                display: none;
+            }
+
+            /* 달력 폭 맞춤: 요일과 날짜 칸 정렬 */
+            .cal {
+                overflow: visible;
+                border-radius: 12px;
+                margin-top: 8px;
+            }
+
             .week,
             .grid {
-                min-width: 980px
+                width: 100%;
+                min-width: 0;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
             }
 
-            .cal {
-                overflow: auto
+            .w {
+                min-width: 0;
+                padding: 8px 0;
+                font-size: 11px;
+                box-sizing: border-box;
             }
 
+            .day {
+                min-width: 0;
+                min-height: 78px;
+                padding: 4px;
+                box-sizing: border-box;
+            }
+
+            .datebar {
+                font-size: 11px;
+                margin-bottom: 3px;
+                align-items: center;
+            }
+
+            .datebar button {
+                padding: 2px 5px;
+                font-size: 11px;
+                border-radius: 8px;
+            }
+
+            .today .datebar span {
+                padding: 2px 6px;
+            }
+
+            /* 모바일 일정 카드는 요약 표시 */
+            .event {
+                margin: 2px 0;
+                padding: 4px 5px;
+                min-height: 0;
+                border-radius: 6px;
+            }
+
+            .event .t {
+                font-size: 10.5px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .event .m {
+                display: none;
+            }
+
+            .badge {
+                font-size: 9px;
+                padding: 0 3px;
+                margin-right: 3px;
+            }
+
+            /* 팝업 안의 입력칸은 모바일에서 1열 유지 */
             .dateRow,
             .mainRow,
             .subRow,
             .colorRow {
-                grid-template-columns: 1fr
-            }
-
-            .day {
-                min-height: 125px
+                grid-template-columns: 1fr;
+                gap: 6px;
             }
         }
     </style>
