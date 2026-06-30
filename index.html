@@ -461,112 +461,42 @@
                 gap: 6px;
             }
         }
+    
 
-
-            /* ===== 모바일 팝업 최종 덮어쓰기: 입력칸 겹침/높이/너비 강제 보정 ===== */
-            @media(max-width:900px) {
-                .modal.open {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    padding: 10px !important;
-                    overflow: auto !important;
-                }
-
-                .modal.open .panel {
-                    width: min(94vw, 430px) !important;
-                    max-height: 78dvh !important;
-                    padding: 16px 18px !important;
-                    border-radius: 16px !important;
-                    overflow: auto !important;
-                    box-sizing: border-box !important;
-                }
-
-                .modal.open .panel h2 {
-                    margin: 0 0 12px !important;
-                    font-size: 20px !important;
-                }
-
-                .modal.open .panel label {
-                    font-size: 12px !important;
-                    margin: 7px 0 4px !important;
-                    line-height: 1.2 !important;
-                }
-
-                .modal.open .panel .field {
-                    width: 100% !important;
-                    min-width: 0 !important;
-                    min-height: 38px !important;
-                    padding: 7px 8px !important;
-                    font-size: 13px !important;
-                    border-radius: 8px !important;
-                    box-sizing: border-box !important;
-                }
-
-                .modal.open .panel select.field {
-                    min-height: 40px !important;
-                    line-height: 1.2 !important;
-                    padding: 7px 8px !important;
-                }
-
-                .modal.open .panel textarea.field {
-                    min-height: 72px !important;
-                }
-
-                .modal.open .panel .dateRow,
-                .modal.open .panel .mainRow,
-                .modal.open .panel .subRow,
-                .modal.open .panel .colorRow {
-                    display: grid !important;
-                    align-items: end !important;
-                }
-
-                .modal.open .panel .dateRow {
-                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-                    column-gap: 14px !important;
-                    row-gap: 6px !important;
-                }
-
-                .modal.open .panel .mainRow {
-                    grid-template-columns: 0.55fr 2fr 0.9fr !important;
-                    column-gap: 10px !important;
-                    row-gap: 6px !important;
-                }
-
-                .modal.open .panel .subRow {
-                    grid-template-columns: 1.1fr 1.1fr 0.9fr !important;
-                    column-gap: 10px !important;
-                    row-gap: 6px !important;
-                }
-
-                .modal.open .panel .colorRow {
-                    grid-template-columns: 1fr 1fr 1fr !important;
-                    column-gap: 10px !important;
-                    row-gap: 6px !important;
-                }
-
-                .modal.open .panel .dateRow div,
-                .modal.open .panel .mainRow div,
-                .modal.open .panel .subRow div,
-                .modal.open .panel .colorRow div {
-                    min-width: 0 !important;
-                }
-
-                .modal.open .panel .actions {
-                    position: sticky !important;
-                    bottom: 0 !important;
-                    background: white !important;
-                    margin-top: 14px !important;
-                    padding-top: 10px !important;
-                    border-top: 1px solid #e5e7eb !important;
-                    z-index: 2 !important;
-                }
-
-                .modal.open .panel .actions button {
-                    padding: 9px 12px !important;
-                    font-size: 13px !important;
-                }
+        /* ===== 모바일 드롭다운 최종 보정: 구분/목적 칸 높이와 표시 강제 적용 ===== */
+        @media(max-width:900px) {
+            .modal.open .panel select.field,
+            .modal.open .panel #category,
+            .modal.open .panel #purpose {
+                display: block !important;
+                width: 100% !important;
+                height: 40px !important;
+                min-height: 40px !important;
+                padding: 7px 26px 7px 8px !important;
+                font-size: 13px !important;
+                line-height: 1.2 !important;
+                border-radius: 8px !important;
+                box-sizing: border-box !important;
+                background-color: #fff !important;
+                color: #111827 !important;
+                -webkit-appearance: auto !important;
+                appearance: auto !important;
             }
+
+            /* 구분 칸은 너무 좁지 않게, 교육명/이슈 칸은 넓게 */
+            .modal.open .panel .mainRow {
+                grid-template-columns: 0.72fr 1.85fr 1fr !important;
+                column-gap: 10px !important;
+                row-gap: 6px !important;
+            }
+
+            /* 목적 칸도 드롭다운이 잘 보이도록 최소 폭 확보 */
+            .modal.open .panel .subRow {
+                grid-template-columns: 1.05fr 1.05fr 1fr !important;
+                column-gap: 10px !important;
+                row-gap: 6px !important;
+            }
+        }
 
     </style>
 </head>
